@@ -1,6 +1,9 @@
 import datetime
 import json
 
+import logging
+log = logging.getLogger(__name__)
+
 from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
@@ -1885,7 +1888,7 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((contact_point, RDF.type, SCHEMA.ContactPoint))
             self.g.add((publisher_details, SCHEMA.contactPoint, contact_point))
 
-            self.g.add((contact_point, SCHEMA.contactType, Literal('customer service')))
+            self.g.add((contact_point, SCHEMA.contactType, Literal('Customer Service')))
 
             publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
             if not publisher_url and dataset_dict.get('organization'):
@@ -1893,8 +1896,8 @@ class SchemaOrgProfile(RDFProfile):
 
             self.g.add((contact_point, SCHEMA.url, Literal(publisher_url)))
             items = [
-                ('publisher_email', SCHEMA.email, ['contact_email', 'maintainer_email', 'author_email'], Literal),
-                ('publisher_name', SCHEMA.name, ['contact_name', 'maintainer', 'author'], Literal),
+                ('primary_contact_email', SCHEMA.email, ['contact_email', 'maintainer_email', 'author_email'], Literal),
+                ('primary_contact_name', SCHEMA.name, ['contact_name', 'maintainer', 'author'], Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_point, items)
