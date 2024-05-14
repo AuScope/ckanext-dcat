@@ -1,5 +1,6 @@
 import datetime
 import json
+import ast
 
 import logging
 log = logging.getLogger(__name__)
@@ -1754,6 +1755,9 @@ class SchemaOrgProfile(RDFProfile):
         # Publisher
         self._publisher_graph(dataset_ref, dataset_dict)
 
+        # Author
+        self._author_graph(dataset_ref, dataset_dict)
+
         # Temporal
         self._temporal_graph(dataset_ref, dataset_dict)
 
@@ -1901,6 +1905,32 @@ class SchemaOrgProfile(RDFProfile):
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_point, items)
+
+    def _author_graph(self, dataset_ref, dataset_dict):
+        """
+        Try to output authors of the sample and their affiliations
+        """
+        try:
+            author_list = ast.literal_eval(dataset_dict.get('author','[]'))
+        except Exception:
+            return
+        for author in author_list:
+            name = author.get('author_name', '')
+            affil_name = author.get('author_affiliation', '')
+            email = author.get('author_email', '')
+            affil_id = author.get('author_affiliation_identifier', '')
+
+            # Represent affilation as an Organisation
+            org_details = BNode()
+            self.g.add((org_details, SCHEMA.name, Literal(affil_name)))
+            self.g.add((org_details, SCHEMA.identifier, Literal(affil_id)))
+            # Represent the author as a Person
+            author_details = BNode()
+            self.g.add((author_details, SCHEMA.email, Literal(email)))
+            self.g.add((author_details, SCHEMA.name, Literal(name)))
+            self.g.add((author_details, SCHEMA.affiliation, org_details))
+            self.g.add((author_details, RDF.type, SCHEMA.Person))
+            self.g.add((dataset_ref, SCHEMA.author, author_details))
 
     def _temporal_graph(self, dataset_ref, dataset_dict):
         start = self._get_dataset_value(dataset_dict, 'temporal_start')
