@@ -1892,18 +1892,16 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((contact_point, RDF.type, SCHEMA.ContactPoint))
             self.g.add((publisher_details, SCHEMA.contactPoint, contact_point))
 
+            # Hard code AuScope info, as it cannot be sourced from the 'dataset_dict'
             self.g.add((contact_point, SCHEMA.contactType, Literal('Customer Service')))
+            self.g.add((contact_point, SCHEMA.name, Literal('AuScope Ltd')))
+            self.g.add((contact_point, SCHEMA.email, Literal('info@auscope.org')))
+            self.g.add((contact_point, SCHEMA.url, Literal('https://www.auscope.org.au/')))
 
-            publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
-            if not publisher_url and dataset_dict.get('organization'):
-                publisher_url = dataset_dict['organization'].get('url') or config.get('ckan.site_url')
-
-            self.g.add((contact_point, SCHEMA.url, Literal(publisher_url)))
             items = [
                 ('primary_contact_email', SCHEMA.email, ['contact_email', 'maintainer_email', 'author_email'], Literal),
-                ('primary_contact_name', SCHEMA.name, ['contact_name', 'maintainer', 'author'], Literal),
+                ('primary_contact_name', SCHEMA.name, ['contact_name', 'maintainer'], Literal),
             ]
-
             self._add_triples_from_dict(dataset_dict, contact_point, items)
 
     def _author_graph(self, dataset_ref, dataset_dict):
